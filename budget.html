@@ -1,0 +1,981 @@
+<!DOCTYPE html>
+<html lang="en">
+
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Till — shop within your means</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link
+        href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap"
+        rel="stylesheet">
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/gsap.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/gsap/3.12.5/ScrollTrigger.min.js"></script>
+    <style>
+        :root {
+            --paper: #FAF7F0;
+            --paper-dim: #F1ECE0;
+            --ink: #1C1B18;
+            --ink-soft: #5E5A4E;
+            --line: #DAD4C2;
+            --red: #B3413B;
+            --green: #2E6B4F;
+            --shadow: 0 1px 0 rgba(0, 0, 0, 0.04);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html,
+        body {
+            margin: 0;
+            padding: 0;
+        }
+
+        body {
+            background: var(--paper-dim);
+            color: var(--ink);
+            font-family: 'Space Grotesk', sans-serif;
+            -webkit-font-smoothing: antialiased;
+        }
+
+        .mono {
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        /* ---------- top bar ---------- */
+        header {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            padding: 22px 28px;
+            background: var(--paper);
+            border-bottom: 1px solid var(--line);
+            position: sticky;
+            top: 0;
+            z-index: 10;
+        }
+
+        .brand {
+            font-weight: 700;
+            font-size: 1.3rem;
+            letter-spacing: -0.02em;
+            display: flex;
+            align-items: baseline;
+            gap: 8px;
+        }
+
+        .brand .mark {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.7rem;
+            color: var(--ink-soft);
+            border: 1px solid var(--line);
+            padding: 2px 6px;
+            border-radius: 3px;
+            letter-spacing: 0.05em;
+        }
+
+        #cart-btn {
+            font-family: 'IBM Plex Mono', monospace;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 10px 16px;
+            border-radius: 3px;
+            cursor: pointer;
+            font-size: 0.85rem;
+            display: flex;
+            gap: 10px;
+            align-items: center;
+            transition: transform .15s ease;
+        }
+
+        #cart-btn:hover {
+            transform: translateY(-1px);
+        }
+
+        #cart-count {
+            background: var(--red);
+            color: #fff;
+            border-radius: 50%;
+            width: 18px;
+            height: 18px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 0.7rem;
+        }
+
+        /* ---------- shop grid ---------- */
+        main {
+            max-width: 960px;
+            margin: 0 auto;
+            padding: 36px 24px 80px;
+        }
+
+        .hero {
+            margin-bottom: 36px;
+            position: relative;
+            padding: 12px 0 4px;
+            overflow: hidden;
+        }
+
+        .hero-layer {
+            position: absolute;
+            pointer-events: none;
+            user-select: none;
+        }
+
+        .hero-layer.grid-tex {
+            top: -40px;
+            right: -60px;
+            width: 280px;
+            height: 280px;
+            background-image:
+                linear-gradient(var(--line) 1px, transparent 1px),
+                linear-gradient(90deg, var(--line) 1px, transparent 1px);
+            background-size: 24px 24px;
+            opacity: 0.5;
+            mask-image: radial-gradient(circle, black 40%, transparent 75%);
+        }
+
+        .hero-layer.ghost-stamp {
+            top: -10px;
+            right: 20px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 700;
+            font-size: 5.5rem;
+            color: var(--green);
+            opacity: 0.07;
+            letter-spacing: 0.05em;
+            transform: rotate(-12deg);
+            white-space: nowrap;
+        }
+
+        .hero-content {
+            position: relative;
+            z-index: 1;
+        }
+
+        .hero .eyebrow {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            color: var(--ink-soft);
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+        }
+
+        .hero h1 {
+            font-size: 2.1rem;
+            margin: 6px 0 8px;
+            letter-spacing: -0.02em;
+        }
+
+        .hero p {
+            color: var(--ink-soft);
+            max-width: 46ch;
+            line-height: 1.5;
+            margin: 0;
+        }
+
+        .grid {
+            display: grid;
+            grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+            gap: 16px;
+        }
+
+        .item {
+            background: var(--paper);
+            border: 1px solid var(--line);
+            border-radius: 6px;
+            padding: 16px;
+            display: flex;
+            flex-direction: column;
+            gap: 10px;
+            box-shadow: var(--shadow);
+        }
+
+        .item .thumb {
+            height: 90px;
+            border-radius: 4px;
+            background: var(--paper-dim);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 2rem;
+        }
+
+        .item .cat {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.65rem;
+            color: var(--ink-soft);
+            text-transform: uppercase;
+            letter-spacing: 0.06em;
+        }
+
+        .item .name {
+            font-weight: 500;
+            font-size: 0.95rem;
+        }
+
+        .item .row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            margin-top: auto;
+        }
+
+        .item .price {
+            font-family: 'IBM Plex Mono', monospace;
+            font-weight: 600;
+        }
+
+        .item button {
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.75rem;
+            background: transparent;
+            border: 1px solid var(--ink);
+            color: var(--ink);
+            padding: 6px 10px;
+            border-radius: 3px;
+            cursor: pointer;
+            transition: background .15s ease, color .15s ease;
+        }
+
+        .item button:hover {
+            background: var(--ink);
+            color: var(--paper);
+        }
+
+        .item button:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        /* ---------- cart drawer ---------- */
+        #overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(28, 27, 24, 0.35);
+            opacity: 0;
+            pointer-events: none;
+            transition: opacity .2s ease;
+            z-index: 20;
+        }
+
+        #overlay.open {
+            opacity: 1;
+            pointer-events: auto;
+        }
+
+        #drawer {
+            position: fixed;
+            top: 0;
+            right: 0;
+            height: 100%;
+            width: 360px;
+            max-width: 92vw;
+            background: var(--paper);
+            border-left: 1px solid var(--line);
+            transform: translateX(100%);
+            transition: transform .25s ease;
+            z-index: 21;
+            display: flex;
+            flex-direction: column;
+        }
+
+        #drawer.open {
+            transform: translateX(0);
+        }
+
+        .drawer-head {
+            padding: 20px 20px 14px;
+            border-bottom: 1px dashed var(--line);
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+        }
+
+        .drawer-head h2 {
+            margin: 0;
+            font-size: 1.05rem;
+        }
+
+        .drawer-head button {
+            background: none;
+            border: none;
+            font-size: 1.2rem;
+            cursor: pointer;
+            color: var(--ink-soft);
+        }
+
+        #cart-items {
+            flex: 1;
+            overflow-y: auto;
+            padding: 12px 20px;
+        }
+
+        .cart-row {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            padding: 10px 0;
+            border-bottom: 1px solid var(--line);
+            font-size: 0.88rem;
+        }
+
+        .cart-row .qty {
+            font-family: 'IBM Plex Mono', monospace;
+            color: var(--ink-soft);
+            font-size: 0.78rem;
+        }
+
+        .cart-row .remove {
+            background: none;
+            border: none;
+            color: var(--red);
+            cursor: pointer;
+            font-size: 0.75rem;
+            font-family: 'IBM Plex Mono', monospace;
+        }
+
+        .empty-note {
+            color: var(--ink-soft);
+            font-size: 0.85rem;
+            padding: 30px 0;
+            text-align: center;
+        }
+
+        .drawer-foot {
+            border-top: 1px dashed var(--line);
+            padding: 16px 20px 22px;
+        }
+
+        .subtotal-row {
+            display: flex;
+            justify-content: space-between;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.95rem;
+            margin-bottom: 14px;
+        }
+
+        #checkout-btn {
+            width: 100%;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 13px;
+            border-radius: 3px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.85rem;
+            cursor: pointer;
+        }
+
+        #checkout-btn:disabled {
+            opacity: 0.4;
+            cursor: default;
+        }
+
+        /* ---------- modal ---------- */
+        #modal-overlay {
+            position: fixed;
+            inset: 0;
+            background: rgba(28, 27, 24, 0.5);
+            display: none;
+            align-items: center;
+            justify-content: center;
+            z-index: 30;
+            padding: 20px;
+        }
+
+        #modal-overlay.open {
+            display: flex;
+        }
+
+        .modal {
+            background: var(--paper);
+            width: 380px;
+            max-width: 100%;
+            border-radius: 6px;
+            padding: 26px 26px 24px;
+            box-shadow: 0 12px 40px rgba(0, 0, 0, 0.2);
+        }
+
+        .modal h2 {
+            margin: 0 0 4px;
+            font-size: 1.1rem;
+        }
+
+        .modal .sub {
+            color: var(--ink-soft);
+            font-size: 0.85rem;
+            margin-bottom: 20px;
+        }
+
+        .field {
+            margin-bottom: 16px;
+        }
+
+        .field label {
+            display: block;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.72rem;
+            text-transform: uppercase;
+            letter-spacing: 0.05em;
+            color: var(--ink-soft);
+            margin-bottom: 6px;
+        }
+
+        .field input {
+            width: 100%;
+            border: 1px solid var(--line);
+            border-radius: 4px;
+            padding: 10px 12px;
+            font-size: 0.9rem;
+            font-family: 'Space Grotesk', sans-serif;
+            background: #fff;
+        }
+
+        .field input:focus {
+            outline: 2px solid var(--ink);
+            outline-offset: 1px;
+        }
+
+        .modal-actions {
+            display: flex;
+            gap: 10px;
+            margin-top: 6px;
+        }
+
+        .modal-actions button {
+            flex: 1;
+            padding: 11px;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        .btn-primary {
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+        }
+
+        .btn-ghost {
+            background: none;
+            border: 1px solid var(--line);
+            color: var(--ink-soft);
+        }
+
+        .form-error {
+            color: var(--red);
+            font-size: 0.78rem;
+            margin: -8px 0 14px;
+            font-family: 'IBM Plex Mono', monospace;
+            display: none;
+        }
+
+        .form-error.show {
+            display: block;
+        }
+
+        /* ---------- receipt ---------- */
+        .receipt {
+            background: var(--paper);
+            max-width: 340px;
+            margin: 0 auto;
+            font-family: 'IBM Plex Mono', monospace;
+            padding: 26px 22px;
+            position: relative;
+            border-radius: 2px;
+        }
+
+        .receipt::before,
+        .receipt::after {
+            content: "";
+            position: absolute;
+            left: 0;
+            right: 0;
+            height: 10px;
+            background:
+                radial-gradient(circle at 8px 5px, var(--paper-dim) 5px, transparent 5.5px) repeat-x;
+            background-size: 16px 10px;
+        }
+
+        .receipt::before {
+            top: -5px;
+        }
+
+        .receipt::after {
+            bottom: -5px;
+            transform: rotate(180deg);
+        }
+
+        .receipt h3 {
+            text-align: center;
+            font-size: 0.95rem;
+            letter-spacing: 0.08em;
+            margin: 0 0 2px;
+            text-transform: uppercase;
+        }
+
+        .receipt .sub-line {
+            text-align: center;
+            font-size: 0.68rem;
+            color: var(--ink-soft);
+            margin-bottom: 16px;
+        }
+
+        .dash {
+            border-top: 1px dashed var(--line);
+            margin: 12px 0;
+        }
+
+        .r-line {
+            display: flex;
+            justify-content: space-between;
+            font-size: 0.8rem;
+            padding: 3px 0;
+        }
+
+        .r-line.total {
+            font-weight: 600;
+            font-size: 0.9rem;
+        }
+
+        .r-line .name {
+            max-width: 60%;
+        }
+
+        .stamp {
+            position: absolute;
+            top: 38%;
+            right: 14px;
+            transform: rotate(-14deg);
+            border: 3px solid var(--green);
+            color: var(--green);
+            font-weight: 700;
+            font-size: 1rem;
+            letter-spacing: 0.08em;
+            padding: 6px 10px;
+            border-radius: 6px;
+            opacity: 0;
+        }
+
+        .stamp.over {
+            border-color: var(--red);
+            color: var(--red);
+        }
+
+        .cat-stamps {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            justify-content: center;
+            margin: 16px 0 4px;
+        }
+
+        .cat-stamp {
+            border: 2px solid var(--ink-soft);
+            color: var(--ink-soft);
+            border-radius: 4px;
+            padding: 4px 8px;
+            font-size: 0.62rem;
+            font-weight: 600;
+            text-align: center;
+            letter-spacing: 0.03em;
+            opacity: 0;
+            transform: scale(0.6) rotate(0deg);
+        }
+
+        .cat-stamp .amt {
+            display: block;
+            font-size: 0.68rem;
+            margin-top: 1px;
+        }
+
+        .balance-bar-track {
+            height: 8px;
+            background: var(--paper-dim);
+            border-radius: 4px;
+            overflow: hidden;
+            margin: 6px 0 2px;
+        }
+
+        .balance-bar-fill {
+            height: 100%;
+            background: var(--green);
+            border-radius: 4px;
+            transition: width .3s ease;
+        }
+
+        .balance-bar-fill.over {
+            background: var(--red);
+        }
+
+        .balance-pct {
+            font-size: 0.68rem;
+            color: var(--ink-soft);
+            text-align: right;
+        }
+
+        #new-order {
+            display: block;
+            width: 100%;
+            margin-top: 18px;
+            background: var(--ink);
+            color: var(--paper);
+            border: none;
+            padding: 11px;
+            border-radius: 4px;
+            font-family: 'IBM Plex Mono', monospace;
+            font-size: 0.8rem;
+            cursor: pointer;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            * {
+                transition: none !important;
+            }
+        }
+    </style>
+</head>
+
+<body>
+
+    <header>
+        <div class="brand">Till <span class="mark">v1</span></div>
+        <button id="cart-btn" onclick="openDrawer()">
+            Cart <span id="cart-count">0</span>
+        </button>
+    </header>
+
+    <main>
+        <div class="hero">
+            <div class="hero-layer grid-tex" data-speed="0.3"></div>
+            <div class="hero-layer ghost-stamp" data-speed="0.6">APPROVED</div>
+            <div class="hero-content">
+                <div class="eyebrow">Weekly shop</div>
+                <h1>Fill your basket, we'll do the math.</h1>
+                <p>Add what you need. At checkout, tell us what you take home this month, and we'll show you exactly
+                    what this basket costs against it.</p>
+            </div>
+        </div>
+
+        <div class="grid" id="shop-grid"></div>
+    </main>
+
+    <!-- cart drawer -->
+    <div id="overlay" onclick="closeDrawer()"></div>
+    <aside id="drawer">
+        <div class="drawer-head">
+            <h2>Your basket</h2>
+            <button onclick="closeDrawer()" aria-label="Close cart">✕</button>
+        </div>
+        <div id="cart-items"></div>
+        <div class="drawer-foot">
+            <div class="subtotal-row">
+                <span>Subtotal</span>
+                <span id="subtotal">$0.00</span>
+            </div>
+            <button id="checkout-btn" onclick="openCheckout()" disabled>Checkout</button>
+        </div>
+    </aside>
+
+    <!-- checkout / login modal -->
+    <div id="modal-overlay">
+        <div class="modal" id="login-modal">
+            <h2>Before we total this up</h2>
+            <div class="sub">We just need your name and this month's income to check it against your basket.</div>
+            <div class="field">
+                <label for="uname">Your name</label>
+                <input id="uname" type="text" placeholder="e.g. Sam Rivera" />
+            </div>
+            <div class="field">
+                <label for="uincome">Monthly income</label>
+                <input id="uincome" type="number" placeholder="e.g. 3200" min="0" />
+            </div>
+            <div class="form-error" id="form-error">Enter your name and a valid income to continue.</div>
+            <div class="modal-actions">
+                <button class="btn-ghost" onclick="closeCheckout()">Back to cart</button>
+                <button class="btn-primary" onclick="submitCheckout()">See my total</button>
+            </div>
+        </div>
+
+        <!-- receipt / result modal -->
+        <div class="receipt" id="receipt-modal" style="display:none;">
+            <div class="stamp" id="stamp">APPROVED</div>
+            <h3>Till receipt</h3>
+            <div class="sub-line" id="receipt-name">for —</div>
+            <div id="receipt-items"></div>
+            <div class="dash"></div>
+            <div class="cat-stamps" id="cat-stamps"></div>
+            <div class="dash"></div>
+            <div class="r-line total">
+                <span class="name">Basket total</span>
+                <span id="r-total">$0.00</span>
+            </div>
+            <div class="r-line">
+                <span class="name">Income entered</span>
+                <span id="r-income">$0.00</span>
+            </div>
+            <div class="r-line total">
+                <span class="name">Remaining</span>
+                <span id="r-remaining">$0.00</span>
+            </div>
+            <div class="balance-bar-track">
+                <div class="balance-bar-fill" id="balance-fill"></div>
+            </div>
+            <div class="balance-pct" id="balance-pct">0% of income spent</div>
+            <button id="new-order" onclick="resetAll()">Start a new basket</button>
+        </div>
+    </div>
+
+    <script>
+        const PRODUCTS = [
+            { id: 1, name: "Sourdough loaf", cat: "Groceries", price: 5.50, emoji: "🍞" },
+            { id: 2, name: "Free-range eggs (dozen)", cat: "Groceries", price: 4.20, emoji: "🥚" },
+            { id: 3, name: "Olive oil, 1L", cat: "Groceries", price: 11.00, emoji: "🫒" },
+            { id: 4, name: "Laundry detergent", cat: "Household", price: 9.75, emoji: "🧴" },
+            { id: 5, name: "Paper towels, 6pk", cat: "Household", price: 8.40, emoji: "🧻" },
+            { id: 6, name: "LED bulb, 4-pack", cat: "Household", price: 12.30, emoji: "💡" },
+            { id: 7, name: "Wireless earbuds", cat: "Electronics", price: 59.99, emoji: "🎧" },
+            { id: 8, name: "USB-C cable, 2m", cat: "Electronics", price: 10.50, emoji: "🔌" },
+            { id: 9, name: "Cotton t-shirt", cat: "Clothing", price: 16.00, emoji: "👕" },
+            { id: 10, name: "Wool socks, 3pk", cat: "Clothing", price: 13.50, emoji: "🧦" },
+            { id: 11, name: "Notebook, A5", cat: "Stationery", price: 4.80, emoji: "📓" },
+            { id: 12, name: "Ballpoint pens, 5pk", cat: "Stationery", price: 3.60, emoji: "🖊️" },
+        ];
+
+        let cart = {}; // id -> qty
+        let checkoutData = null;
+
+        function renderShop() {
+            const grid = document.getElementById('shop-grid');
+            grid.innerHTML = PRODUCTS.map(p => `
+      <div class="item">
+        <div class="thumb">${p.emoji}</div>
+        <div class="cat">${p.cat}</div>
+        <div class="name">${p.name}</div>
+        <div class="row">
+          <span class="price mono">$${p.price.toFixed(2)}</span>
+          <button onclick="addToCart(${p.id})">Add</button>
+        </div>
+      </div>
+    `).join('');
+
+            if (window.gsap) {
+                gsap.set('.item', { opacity: 0, y: 18 });
+                gsap.to('.item', {
+                    opacity: 1, y: 0, duration: 0.5, ease: 'power2.out',
+                    stagger: 0.05, delay: 0.15
+                });
+            }
+        }
+
+        function initParallax() {
+            if (!window.gsap || !window.ScrollTrigger) return;
+            gsap.registerPlugin(ScrollTrigger);
+            document.querySelectorAll('.hero-layer').forEach(layer => {
+                const speed = parseFloat(layer.dataset.speed || 0.4);
+                gsap.to(layer, {
+                    y: () => (1 - speed) * -120,
+                    ease: 'none',
+                    scrollTrigger: {
+                        trigger: 'main',
+                        start: 'top top',
+                        end: 'bottom top',
+                        scrub: true
+                    }
+                });
+            });
+        }
+
+        function addToCart(id) {
+            cart[id] = (cart[id] || 0) + 1;
+            renderCart();
+            openDrawer();
+        }
+
+        function removeFromCart(id) {
+            delete cart[id];
+            renderCart();
+        }
+
+        function changeQty(id, delta) {
+            cart[id] = (cart[id] || 0) + delta;
+            if (cart[id] <= 0) delete cart[id];
+            renderCart();
+        }
+
+        function cartEntries() {
+            return Object.entries(cart).map(([id, qty]) => {
+                const product = PRODUCTS.find(p => p.id == id);
+                return { ...product, qty };
+            });
+        }
+
+        function cartTotal() {
+            return cartEntries().reduce((sum, e) => sum + e.price * e.qty, 0);
+        }
+
+        function cartCount() {
+            return Object.values(cart).reduce((a, b) => a + b, 0);
+        }
+
+        function renderCart() {
+            const entries = cartEntries();
+            const list = document.getElementById('cart-items');
+            document.getElementById('cart-count').textContent = cartCount();
+            document.getElementById('subtotal').textContent = '$' + cartTotal().toFixed(2);
+            document.getElementById('checkout-btn').disabled = entries.length === 0;
+
+            if (entries.length === 0) {
+                list.innerHTML = '<div class="empty-note">Your basket is empty. Add something from the shop.</div>';
+                return;
+            }
+
+            list.innerHTML = entries.map(e => `
+      <div class="cart-row">
+        <div>
+          <div>${e.name}</div>
+          <div class="qty">
+            <button onclick="changeQty(${e.id}, -1)" style="border:none;background:none;cursor:pointer;">−</button>
+            ${e.qty}
+            <button onclick="changeQty(${e.id}, 1)" style="border:none;background:none;cursor:pointer;">+</button>
+            &nbsp;×&nbsp;$${e.price.toFixed(2)}
+          </div>
+        </div>
+        <div style="display:flex;align-items:center;gap:10px;">
+          <span class="mono">$${(e.price * e.qty).toFixed(2)}</span>
+          <button class="remove" onclick="removeFromCart(${e.id})">Remove</button>
+        </div>
+      </div>
+    `).join('');
+        }
+
+        function openDrawer() {
+            document.getElementById('drawer').classList.add('open');
+            document.getElementById('overlay').classList.add('open');
+        }
+        function closeDrawer() {
+            document.getElementById('drawer').classList.remove('open');
+            document.getElementById('overlay').classList.remove('open');
+        }
+
+        function openCheckout() {
+            closeDrawer();
+            document.getElementById('login-modal').style.display = 'block';
+            document.getElementById('receipt-modal').style.display = 'none';
+            document.getElementById('modal-overlay').classList.add('open');
+        }
+        function closeCheckout() {
+            document.getElementById('modal-overlay').classList.remove('open');
+        }
+
+        function submitCheckout() {
+            const name = document.getElementById('uname').value.trim();
+            const income = parseFloat(document.getElementById('uincome').value);
+            const err = document.getElementById('form-error');
+
+            if (!name || isNaN(income) || income <= 0) {
+                err.classList.add('show');
+                return;
+            }
+            err.classList.remove('show');
+
+            checkoutData = { name, income };
+            document.getElementById('login-modal').style.display = 'none';
+            document.getElementById('receipt-modal').style.display = 'block';
+            renderReceipt();
+        }
+
+        function categoryTotals(entries) {
+            const totals = {};
+            entries.forEach(e => {
+                totals[e.cat] = (totals[e.cat] || 0) + e.price * e.qty;
+            });
+            return totals;
+        }
+
+        function renderReceipt() {
+            const entries = cartEntries();
+            const total = cartTotal();
+            const { name, income } = checkoutData;
+            const remaining = income - total;
+            const pctSpent = Math.min((total / income) * 100, 999);
+
+            document.getElementById('receipt-name').textContent = 'for ' + name;
+            document.getElementById('receipt-items').innerHTML = entries.map(e => `
+      <div class="r-line">
+        <span class="name">${e.qty}× ${e.name}</span>
+        <span>$${(e.price * e.qty).toFixed(2)}</span>
+      </div>
+    `).join('');
+            document.getElementById('r-total').textContent = '$' + total.toFixed(2);
+            document.getElementById('r-income').textContent = '$' + income.toFixed(2);
+            document.getElementById('r-remaining').textContent = (remaining < 0 ? '-$' + Math.abs(remaining).toFixed(2) : '$' + remaining.toFixed(2));
+
+            const stamp = document.getElementById('stamp');
+            const fill = document.getElementById('balance-fill');
+            const pctLabel = document.getElementById('balance-pct');
+            const over = remaining < 0;
+
+            stamp.textContent = over ? 'OVER BUDGET' : 'APPROVED';
+            stamp.classList.toggle('over', over);
+            fill.classList.toggle('over', over);
+            fill.style.width = Math.min(pctSpent, 100) + '%';
+            pctLabel.textContent = pctSpent.toFixed(0) + '% of income spent';
+
+            const catTotals = categoryTotals(entries);
+            const stampsEl = document.getElementById('cat-stamps');
+            stampsEl.innerHTML = Object.entries(catTotals).map(([cat, amt]) => `
+      <div class="cat-stamp">${cat}<span class="amt">$${amt.toFixed(2)}</span></div>
+    `).join('');
+
+            playStampSequence(over);
+        }
+
+        function playStampSequence(over) {
+            if (!window.gsap) {
+                document.getElementById('stamp').style.opacity = 1;
+                document.querySelectorAll('.cat-stamp').forEach(el => el.style.opacity = 1);
+                return;
+            }
+            const tl = gsap.timeline();
+            const catEls = document.querySelectorAll('.cat-stamp');
+
+            tl.to(catEls, {
+                opacity: 1,
+                scale: 1,
+                rotate: () => gsap.utils.random(-8, 8),
+                duration: 0.35,
+                ease: 'back.out(3)',
+                stagger: 0.12
+            })
+                .fromTo('#stamp',
+                    { opacity: 0, scale: 1.6, rotate: -14 },
+                    { opacity: 0.85, scale: 1, rotate: -14, duration: 0.4, ease: 'back.out(4)' },
+                    '+=0.1'
+                );
+        }
+
+        function resetAll() {
+            cart = {};
+            checkoutData = null;
+            document.getElementById('uname').value = '';
+            document.getElementById('uincome').value = '';
+            renderCart();
+            closeCheckout();
+        }
+
+        renderShop();
+        renderCart();
+        initParallax();
+    </script>
+
+</body>
+
+</html>
