@@ -18,7 +18,7 @@ if (!loggedkey || !localStorage.getItem(loggedkey)) {
 }
 
 
-// Display Income and Expense
+// display income and expense
 function displayincomeexpense() {
 
     let user = JSON.parse(localStorage.getItem(loggedkey));
@@ -33,7 +33,7 @@ function displayincomeexpense() {
 }
 
 
-// Add Income
+// add income
 function addIncome(event) {
 
     event.preventDefault();
@@ -72,7 +72,7 @@ function addIncome(event) {
 }
 
 
-// Display Income History
+// display income history
 function displayincomeArray() {
 
     let user = JSON.parse(localStorage.getItem(loggedkey));
@@ -98,7 +98,7 @@ function displayincomeArray() {
 }
 
 
-// Add Expense
+// add expense
 function addExpense(event) {
 
     event.preventDefault();
@@ -143,7 +143,7 @@ function addExpense(event) {
 }
 
 
-// Display Expense History
+// display expense history
 function displayexpenseArray() {
 
     let user = JSON.parse(localStorage.getItem(loggedkey));
@@ -169,7 +169,7 @@ function displayexpenseArray() {
 }
 
 
-// Clear All
+// clear all
 function clearAll() {
 
     if (!confirm("Are you sure you want to clear all transaction data?")) {
@@ -198,7 +198,7 @@ function clearAll() {
 }
 
 
-// Logout
+// logout
 function logout() {
 
     localStorage.removeItem("loggedkey");
@@ -207,7 +207,7 @@ function logout() {
 }
 
 
-// Pie Chart
+// pie Chart
 let pieChartInstance = null;
 
 
@@ -267,7 +267,7 @@ function displaychart() {
 }
 
 
-// Generate Chart Colors
+// generate Chart Colors
 function generateDistinctColors(num) {
 
     let colors = [];
